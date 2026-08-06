@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间不存在 | 《智者的苏醒》沉浸式感官舱</title>
+    <style>
+        :root {
+            --bg-color: #050607;
+            --border-color: rgba(57, 255, 20, 0.2);
+            --glow-color: #39ff14;
+            --text-primary: #e0e4eb;
+            --text-secondary: #9099a8;
+            --panel-bg: rgba(14, 16, 20, 0.95);
+            --font-mono: 'Courier New', Courier, monospace, "Microsoft YaHei";
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body, html {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, var(--font-mono);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            height: 100%;
+        }
+
+        .glowing-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 30% 20%, rgba(57, 255, 20, 0.04) 0%, transparent 40%),
+                        radial-gradient(circle at 70% 80%, rgba(0, 250, 154, 0.03) 0%, transparent 45%),
+                        radial-gradient(circle at 50% 50%, rgba(11, 12, 14, 0.95) 0%, #050607 100%);
+            z-index: -2;
+        }
+
+        #back-to-index {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            z-index: 99999;
+            background: rgba(14, 14, 14, 0.85);
+            border: 1px solid rgba(57, 255, 20, 0.2);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        #back-to-index:hover {
+            border-color: var(--glow-color);
+            color: var(--glow-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(57, 255, 20, 0.2);
+        }
+        .back-icon {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        #bgm-ctrl {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            z-index: 99999;
+            background: rgba(14, 14, 14, 0.85);
+            border: 1px solid rgba(57, 255, 20, 0.2);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        #bgm-ctrl:hover {
+            border-color: var(--glow-color);
+            color: var(--glow-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(57, 255, 20, 0.2);
+        }
+        .bgm-icon {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+        .pulse-playing {
+            animation: pulse 1.8s infinite ease-in-out;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 90px 2rem 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header-title h1 {
+            font-size: 2.8rem;
+            font-weight: 300;
+            letter-spacing: 0.4rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #fff, var(--glow-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(57, 255, 20, 0.2);
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+        }
+
+        .gallery-viewport {
+            width: 100%;
+            height: 440px;
+            perspective: 1200px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4rem;
+            overflow: hidden;
+        }
+
+        .gallery-track {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+
+        .gallery-slide {
+            position: absolute;
+            width: 580px;
+            height: 380px;
+            top: 30px;
+            left: calc(50% - 290px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: #000;
+            overflow: hidden;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.8);
+            transform-style: preserve-3d;
+            transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.7s, border-color 0.7s, box-shadow 0.7s;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .gallery-slide img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .slide-caption {
+            height: 60px;
+            background: #0d0f12;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0 1.5rem;
+            text-align: center;
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(14, 16, 20, 0.8);
+            border: 1px solid rgba(57, 255, 20, 0.15);
+            color: var(--text-primary);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--glow-color);
+            color: var(--glow-color);
+            background: rgba(14, 16, 20, 0.95);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.3);
+        }
+
+        .prev-btn { left: 40px; }
+        .next-btn { right: 40px; }
+
+        @media (max-width: 800px) {
+            .header-title h1 {
+                font-size: 1.8rem !important; /* 移动端标题缩小，避免重叠 */
+                margin-top: 50px !important; /* 标题整体下移，为两侧的悬浮按钮留出安全空间 */
+                line-height: 1.4 !important;
+            }
+            .gallery-slide {
+                width: 320px;
+                height: 280px;
+                left: calc(50% - 160px);
+            }
+            .gallery-slide img {
+                height: 220px;
+            }
+            .gallery-viewport {
+                height: 340px;
+            }
+            .prev-btn { left: 10px; }
+            .next-btn { right: 10px; }
+        }
+
+        /* 深度阅读与合约区 */
+        .reading-box {
+            width: 100%;
+            max-width: 900px;
+            background: var(--panel-bg);
+            border: 1px solid rgba(57, 255, 20, 0.1);
+            border-radius: 8px;
+            padding: 3rem 2.5rem;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+            margin-bottom: 4rem;
+        }
+
+        .reading-box-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #fff;
+            margin-bottom: 2rem;
+            letter-spacing: 0.25rem;
+            border-left: 3px solid var(--glow-color);
+            padding-left: 12px;
+        }
+
+        .story-scroller {
+            font-size: 1.05rem;
+            line-height: 2.1;
+            color: var(--text-primary);
+            text-align: justify;
+            margin-bottom: 3rem;
+        }
+
+        .story-scroller p {
+            margin-bottom: 2rem;
+            text-indent: 2em;
+        }
+
+        /* 共同维护合约 */
+        .contract-section {
+            padding: 2.5rem 2rem;
+            background: rgba(5, 6, 8, 0.9);
+            border: 1px solid rgba(57, 255, 20, 0.1);
+            border-radius: 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .contract-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .contract-header h3 {
+            font-size: 1.3rem;
+            font-weight: 300;
+            color: #fff;
+            letter-spacing: 0.2rem;
+        }
+
+        .contract-pages {
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(5,6,8,0.95);
+            border-radius: 4px;
+            height: 200px;
+            overflow-y: auto;
+            padding: 1.2rem;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .contract-pages p {
+            margin-bottom: 0.8rem;
+        }
+
+        .contract-pages strong {
+            color: var(--text-primary);
+        }
+
+        .contract-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .input-text {
+            flex-grow: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 0.8rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-text:focus {
+            border-color: var(--glow-color);
+            background: rgba(57, 255, 20, 0.02);
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.1);
+        }
+
+        .btn-action {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: var(--font-mono);
+        }
+
+        .btn-action:hover {
+            border-color: var(--glow-color);
+            color: var(--glow-color);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+        }
+
+        .signee-badge {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .signee-badge span {
+            color: var(--glow-color);
+        }
+
+        .signee-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glowing-bg"></div>
+
+    <a href="index2.html" id="back-to-index" title="返回主页大厅 (可直接按键盘 ESC 键)">
+        <svg class="back-icon" viewBox="0 0 24 24" style="transform: rotate(180deg);">
+            <path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-8.29-1.42 1.42 5.43 5.43H5v2z"/>
+        </svg>
+        <span>返回主页 [ESC]</span>
+    </a>
+
+    <div id="bgm-ctrl" onclick="toggleBGM(event)" title="背景音乐控制">
+        <svg class="bgm-icon" viewBox="0 0 24 24" id="bgm-icon">
+            <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM12 4L9.91 6.09 12 8.18V4zm-8 8H6l5 5v-4.18L5.18 10H4v4zM19 12c0 2.94-1.7 5.48-4.17 6.64l1.35 1.35C19.34 18.28 21 15.33 21 12s-1.66-6.28-4.82-8l-1.35 1.35C17.3 6.52 19 9.06 19 12z" />
+        </svg>
+        <span id="bgm-text">音乐: MUTED</span>
+    </div>
+
+    <main>
+        <div class="header-title">
+            <h1>智者的苏醒</h1>
+            <p>“最先跃入脑海的竟是芯片本身，她在大脑神经融合的黑暗里，看到了如星系般不灭的光芒。”</p>
+        </div>
+
+        <!-- 3D 左右滑动 Cover Flow 画廊 -->
+        <div class="gallery-viewport">
+            <button class="nav-btn prev-btn" id="btn-prev" title="上一张">◀</button>
+            <div class="gallery-track" id="gallery-track">
+                <div class="gallery-slide" data-index="0" onclick="setSlideIndex(0)">
+                    <img src="shot01_breathing_ore.png" alt="三十五亿年的层叠石">
+                    <div class="slide-caption">镜头一 // 固态寂静 · 三十五亿年前层叠石诡谲的绿</div>
+                </div>
+                <div class="gallery-slide" data-index="1" onclick="setSlideIndex(1)">
+                    <img src="shot04_galaxy_brain.png" alt="脑波共振星系">
+                    <div class="slide-caption">镜头二 // 意识融汇 · 脑神经融合与荷尔蒙调节</div>
+                </div>
+                <div class="gallery-slide" data-index="2" onclick="setSlideIndex(2)">
+                    <img src="shot05_mind_greenlight.png" alt="数字消解飞升">
+                    <div class="slide-caption">镜头三 // 物理除权 · 既然未来允许，肉身退化又如何</div>
+                </div>
+            </div>
+            <button class="nav-btn next-btn" id="btn-next" title="下一张">▶</button>
+        </div>
+
+        <!-- 深度阅读舱 (合并了 index3 的正文与合约！) -->
+        <div class="reading-box">
+            <h2 class="reading-box-title">智者的苏醒（节选）</h2>
+            <div class="story-scroller">
+                <p>“麻醉的过程里，请您想一样让自己着迷的东西。”医生说道，“想得越细致越好。这将有利于芯片和脑神经快速融合链接。”</p>
+                <p>M点点头，闭起眼睛。最先跃入脑海的竟是芯片本身，她在手术前的数次会诊中细看过它。硅与碳，纳米ANI。这只是个微创手术。几十年前的医学界就能让纳米机器人在人体血液系统内精准定位给药、在局部器官内消除病变，如今这个手术只是升级版，定位于脑部。</p>
+                <p>世纪初，医美兴起，如同所有高科技产品一样昂贵，M心态上很能接受，但对最优先发达的技术细节不甚满意：具有太高同质化的模板操作令这一行蒙羞，高利润又给这一行镀了金。M坚信：有朝一日，按照自己的要求整容将和二十世纪末流行的洗牙程序一样简单且廉价。M那时还年轻，等得起。等待是乐观的，但肉身老去会令人悲观。M在四十五岁时已完全改变了想法：既然未来科技允许肉身可换，至少局部可换，义体取缔了有机肉身一次性的腐朽，整容不过是替代性的前期作业，她期待的不再是容颜的更新，而是整个肉身的换新。但到了2030年，M仍没有等到义体的合法化。更不用说平价化了。</p>
+                <p>肉身的老去，是从局部声张重要性开始的，每一个局部都只把自己当回事儿。每一个局部都在呐喊人生对自己的无尽折磨、错用、滥用乃至无用。失修。或仅仅是意识到自身消逝前的顿悟瞬间发出的叹息般的呐喊。皮肤。眼睛。关节。肠胃。再是血管，心脏，海马沟。所有的局部轮番浮现，强迫她感触到自我内部的细微振动。放出长屁后的松弛感重新定义了愉悦。排泄重新定义了快感。眼明耳聪重新定义了青春。终于体认了肉身，也就到了决意放弃肉身的终点。</p>
+                <p>所以，时年六九岁的M躺在手术台上，即将被植入脑部芯片。她成了率先尝试大脑更新业务的新顾客，花费了毕生积蓄的十分之七。她不能理解：为什么大多数人恐惧、排斥这种更新技术？要知道，同样的价钱只能处理脂肪、表皮细胞和局部骨骼和脏器！而她可以一劳永逸地更新自己即将衰老的大脑，加速学习和记忆能力，调控脑神经节点，定期更新版本还能补充最新知识，好比是把浩瀚无边的人类知识无线传输到大脑里，还可以调节下丘脑的内分泌。多巴胺。荷尔蒙。幸福感。只需毕生积蓄的十分之七，她就能拥有此生始终可望而不可即的智慧和快乐。理论上，还能因此挣到更多钱，义体也就不在话下了，那只是形而下的脱胎换骨。这是曲线救国，不，是治本而非治标。</p>
+            </div>
+
+            <!-- 共同维护合约（文字缩减版，完美注入底部！） -->
+            <div class="contract-section">
+                <div class="contract-header">
+                    <h3>W827018 潜能开发项目共同维护合约</h3>
+                    <p style="font-size:0.75rem; color:var(--text-secondary); margin-top:4px;">—— 诊所专属产权与人类最终实体的转让条约 ——</p>
+                </div>
+                <div class="contract-pages">
+                    <p><strong>第一条（转让条约）</strong><br>自本手术起，乙方（改造者）之大脑与身体将作为甲方（诊所）之共有无形资产进行共同维护。乙方享有技术使用优先权，同时让渡肉体之自主处置权。</p>
+                    <p><strong>第十四条（自毁干预）</strong><br>为应对乙方的物理自毁行为，甲方有权在其脑部植入特种干预芯片。芯片侦测到危机后，将强行接管运动神经并强制避险，确保肉体安全存续。</p>
+                    <p><strong>第七十九条（无限保养期）</strong><br>鉴于内分泌与血管换新技术之终身自动升级，乙方的维护期在理论上为无限期。乙方及其家属需永久配合每1095天一期的擦拭与系统保养。</p>
+                </div>
+                <div class="contract-form">
+                    <div class="signature-pad">
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.8rem; text-align:center;">
+                            如果您已阅读并接受此W827018合约的所有细节，请签下您的代号，成为无形资产：
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="signer-input" class="input-text" placeholder="签署您的代号 (e.g. M / M-2030)" maxlength="15">
+                            <button class="btn-action" id="btn-sign" style="border-color: var(--glow-color); color: var(--glow-color);">电子签署</button>
+                        </div>
+                    </div>
+                    <div class="signed-board">
+                        <div class="signee-list" id="signee-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ================= 3D Cover Flow 画廊 =================
+        let activeIdx = 0; // 核心修改：默认显示镜头1 
+        const slides = document.querySelectorAll('.gallery-slide');
+        const slideCount = slides.length;
+
+        function setSlideIndex(idx) {
+            activeIdx = idx;
+            render3DGallery();
+        }
+
+        function render3DGallery() {
+            slides.forEach((slide, idx) => {
+                let offset = idx - activeIdx;
+                if (offset < -1) offset += slideCount;
+                if (offset > 1) offset -= slideCount;
+
+                let transformStr = "";
+                let opacityVal = 0.5;
+                let zIndexVal = 1;
+
+                if (offset === 0) {
+                    transformStr = "translateX(0) translateZ(120px) rotateY(0)";
+                    opacityVal = 1;
+                    zIndexVal = 10;
+                    slide.style.borderColor = "var(--glow-color)";
+                    slide.style.boxShadow = "0 10px 40px rgba(57, 255, 20, 0.4)";
+                } else if (offset === -1) {
+                    transformStr = "translateX(-260px) translateZ(0) rotateY(40deg)";
+                    opacityVal = 0.4;
+                    zIndexVal = 5;
+                    slide.style.borderColor = "rgba(255,255,255,0.05)";
+                    slide.style.boxShadow = "none";
+                } else if (offset === 1) {
+                    transformStr = "translateX(260px) translateZ(0) rotateY(-40deg)";
+                    opacityVal = 0.4;
+                    zIndexVal = 5;
+                    slide.style.borderColor = "rgba(255,255,255,0.05)";
+                    slide.style.boxShadow = "none";
+                } else {
+                    transformStr = "translateZ(-400px)";
+                    opacityVal = 0;
+                    zIndexVal = 0;
+                }
+
+                slide.style.transform = transformStr;
+                slide.style.opacity = opacityVal;
+                slide.style.zIndex = zIndexVal;
+            });
+        }
+
+        document.getElementById('btn-prev').addEventListener('click', (e) => {
+            e.stopPropagation();
+            activeIdx = (activeIdx - 1 + slideCount) % slideCount;
+            render3DGallery();
+        });
+
+        document.getElementById('btn-next').addEventListener('click', (e) => {
+            e.stopPropagation();
+            activeIdx = (activeIdx + 1) % slideCount;
+            render3DGallery();
+        });
+
+        // ================= W827018 合约签署逻辑 =================
+        const signeeListEl = document.getElementById('signee-list');
+        const defaultSignees = [
+            { name: "M (时年69岁)", code: "M-69", time: "2030-10-12" },
+            { name: "自杀幸存者 W", code: "W-827018", time: "2036-05-18" }
+        ];
+
+        function loadSignees() {
+            let signees = localStorage.getItem('contract_signees');
+            try {
+                if (!signees) {
+                    signees = defaultSignees;
+                    localStorage.setItem('contract_signees', JSON.stringify(signees));
+                } else {
+                    signees = JSON.parse(signees);
+                }
+            } catch (e) {
+                console.warn("读取或解析 W827018 契约签署主体缓存失败，已自动重置为默认列表：", e);
+                signees = defaultSignees;
+                localStorage.setItem('contract_signees', JSON.stringify(signees));
+            }
+            renderSignees(signees);
+        }
+
+        function renderSignees(list) {
+            if (!signeeListEl) return;
+            signeeListEl.innerHTML = '';
+            list.forEach(item => {
+                const badge = document.createElement('div');
+                badge.className = 'signee-badge';
+                badge.innerHTML = `<strong>${item.name}</strong> <span>[${item.code}]</span>`;
+                signeeListEl.appendChild(badge);
+            });
+        }
+
+        document.getElementById('btn-sign').addEventListener('click', () => {
+            const input = document.getElementById('signer-input');
+            const name = input.value.trim();
+            if (!name) {
+                alert("请输入签署者的代号或名称，使维护契约正式生效。");
+                return;
+            }
+            const randCode = "COUP-" + Math.floor(1000 + Math.random()*9000);
+            const today = new Date().toISOString().split('T')[0];
+            const newSignee = { name, code: randCode, time: today };
+            
+            let signees = [];
+            try {
+                signees = JSON.parse(localStorage.getItem('contract_signees') || '[]');
+            } catch (e) {
+                console.warn("读取本地条约数据失败，重置为空：", e);
+                signees = [];
+            }
+            
+            signees.push(newSignee);
+            localStorage.setItem('contract_signees', JSON.stringify(signees));
+            renderSignees(signees);
+            input.value = '';
+            alert(`【契约成立】 签署成功。代号 ${randCode} 已上传。脑神经与本院潜能管理系统成功挂钩。`);
+        });
+
+        // ================= BGM 音频控制（与 staircase.html 100% 字节级对齐！） =================
+        let bgmAudio = null;
+        let bgmPlaying = false;
+        let interactionTriggered = false;
+
+        let audioCtx = null;
+        let synthDrone = null;
+        let synthGain = null;
+
+        function startSynthesizedFallback() {
+            if (audioCtx) {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                    bgmPlaying = true;
+                    updateBGMUI(true);
+                }
+                return;
+            }
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                synthDrone = audioCtx.createOscillator();
+                synthDrone.type = 'sawtooth';
+                synthDrone.frequency.value = 68; 
+
+                let filter = audioCtx.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.value = 130;
+
+                synthGain = audioCtx.createGain();
+                synthGain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+
+                synthDrone.connect(filter);
+                filter.connect(synthGain);
+                synthGain.connect(audioCtx.destination);
+
+                synthDrone.start(0);
+                bgmPlaying = true;
+                updateBGMUI(true);
+
+                bgmAudio = {
+                    paused: false,
+                    pause: function() {
+                        if (audioCtx) audioCtx.suspend();
+                        this.paused = true;
+                    },
+                    play: function() {
+                        if (audioCtx) audioCtx.resume();
+                        this.paused = false;
+                        return Promise.resolve();
+                    }
+                };
+            } catch (e) {
+                console.log("声学备用振荡器启动失败:", e);
+            }
+        }
+
+        function initBGM() {
+            if (bgmAudio) return;
+            
+            bgmAudio = new Audio('music.mp3');
+            bgmAudio.loop = true;
+            bgmAudio.volume = 0.45;
+            
+            bgmAudio.addEventListener('error', function() {
+                console.log("未检测到 music.mp3 物理文件，启动 68Hz 空间合成器兜底 (已完全同步对齐)...");
+                startSynthesizedFallback();
+            });
+
+            bgmAudio.play().then(() => {
+                bgmPlaying = true;
+                updateBGMUI(true);
+            }).catch(e => {
+                console.log("自动播放被浏览器拦截，等待读者点击或滚动页面以激活...");
+            });
+        }
+
+        function toggleBGM(e) {
+            if (e) {
+                e.stopPropagation();
+                e.preventDefault();
+            }
+            
+            if (!bgmAudio) {
+                initBGM();
+                setTimeout(() => {
+                    if (bgmAudio) {
+                        bgmAudio.play().then(() => {
+                            bgmPlaying = true;
+                            updateBGMUI(true);
+                        });
+                    }
+                }, 100);
+                return;
+            }
+
+            if (bgmAudio.paused) {
+                bgmAudio.play().then(() => {
+                    bgmPlaying = true;
+                    updateBGMUI(true);
+                }).catch(err => {
+                    console.error("播放失败:", err);
+                });
+            } else {
+                bgmAudio.pause();
+                bgmPlaying = false;
+                updateBGMUI(false);
+            }
+        }
+
+        function updateBGMUI(isPlaying) {
+            const text = document.getElementById('bgm-text');
+            const icon = document.getElementById('bgm-icon');
+            const ctrl = document.getElementById('bgm-ctrl');
+            
+            if (!text || !icon || !ctrl) return;
+            
+            if (isPlaying) {
+                text.textContent = "音乐: PLAYING";
+                ctrl.classList.add('pulse-playing');
+                icon.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+            } else {
+                text.textContent = "音乐: MUTED";
+                ctrl.classList.remove('pulse-playing');
+                icon.innerHTML = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM12 4L9.91 6.09 12 8.18V4zm-8 8H6l5 5v-4.18L5.18 10H4v4zM19 12c0 2.94-1.7 5.48-4.17 6.64l1.35 1.35C19.34 18.28 21 15.33 21 12s-1.66-6.28-4.82-8l-1.35 1.35C17.3 6.52 19 9.06 19 12z" />';
+            }
+        }
+
+        function triggerOnFirstInteraction() {
+            if (interactionTriggered) return;
+            interactionTriggered = true;
+            
+            initBGM();
+            if (bgmAudio && bgmAudio.paused) {
+                bgmAudio.play().then(() => {
+                    bgmPlaying = true;
+                    updateBGMUI(true);
+                }).catch(e => {
+                    console.log("首触播放被浏览器拒绝:", e);
+                });
+            }
+            
+            document.removeEventListener('click', triggerOnFirstInteraction);
+            document.removeEventListener('scroll', triggerOnFirstInteraction);
+            document.removeEventListener('touchstart', triggerOnFirstInteraction);
+        }
+
+        document.addEventListener('click', triggerOnFirstInteraction);
+        document.addEventListener('scroll', triggerOnFirstInteraction);
+        document.addEventListener('touchstart', triggerOnFirstInteraction);
+
+        // ================= 键盘 ESC 返回 index2 =================
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' || event.key === 'Esc') {
+                window.location.href = 'index2.html';
+            }
+        });
+
+        // 初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            render3DGallery();
+            initBGM();
+            loadSignees();
+        });
+    </script>
+</body>
+</html>
