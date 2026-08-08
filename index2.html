@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文学互动共创空间 | 分支选择大厅</title>
+    <style>
+        :root {
+            --bg-color: #0b0c0e;
+            --panel-bg: rgba(20, 22, 26, 0.85);
+            --border-color: rgba(57, 255, 20, 0.2);
+            --glow-color: #39ff14;
+            --text-primary: #e0e4eb;
+            --text-secondary: #9099a8;
+            --accent-warm: rgba(245, 166, 35, 0.8);
+            --font-mono: 'Courier New', Courier, monospace, "Microsoft YaHei";
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body, html {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, var(--font-mono);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            height: 100%;
+        }
+
+        /* 背景模糊插图 */
+        .ambient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-image: linear-gradient(to bottom, rgba(11, 12, 14, 0.85), rgba(11, 12, 14, 0.95)), url('ore_and_mist.jpg');
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+            opacity: 0.4;
+            filter: blur(8px);
+        }
+
+        /* 导航与控制 */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: linear-gradient(to bottom, rgba(11, 12, 14, 0.9), transparent);
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 0.3rem;
+            color: var(--glow-color);
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+            font-family: var(--font-mono);
+        }
+
+        .audio-ctrl {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(20, 22, 26, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .audio-ctrl:hover {
+            border-color: var(--glow-color);
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+        }
+
+        .audio-icon {
+            width: 18px;
+            height: 18px;
+            fill: var(--glow-color);
+        }
+
+        /* 主容器结构 */
+        main {
+            padding-top: 80px;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* 故事前导介绍 */
+        .intro-banner {
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 1px dashed rgba(255,255,255,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .intro-banner h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: 0.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #fff, var(--glow-color), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .intro-banner p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+            font-style: italic;
+        }
+
+        /* 双维度分栏布局 */
+        .dimensions-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            padding: 2rem;
+            min-height: 80vh;
+            margin-bottom: 5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .dimensions-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .dimension-card {
+            background: var(--panel-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            transition: border-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        .dimension-card:hover {
+            border-color: var(--border-color);
+            box-shadow: 0 15px 40px rgba(57, 255, 20, 0.05);
+        }
+
+        .dimension-tag {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--glow-color);
+            letter-spacing: 0.2rem;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dimension-tag::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: var(--glow-color);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--glow-color);
+        }
+
+        .dimension-title {
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            letter-spacing: 0.1rem;
+        }
+
+        /* 故事文本展示区 */
+        .story-scroller {
+            height: 380px;
+            overflow-y: auto;
+            padding-right: 1.5rem;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+            line-height: 1.9;
+            color: var(--text-primary);
+            mask-image: linear-gradient(to bottom, transparent, white 8%, white 92%, transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, white 8%, white 92%, transparent);
+        }
+
+        .story-scroller p {
+            margin-bottom: 1.5rem;
+            text-align: justify;
+        }
+
+        .highlight-text {
+            color: var(--glow-color);
+            cursor: pointer;
+            border-bottom: 1px dashed var(--glow-color);
+            transition: background 0.3s;
+            padding: 0 2px;
+        }
+
+        .highlight-text:hover {
+            background: rgba(57, 255, 20, 0.15);
+        }
+
+        /* 交互微视频画布区 */
+        .canvas-container {
+            width: 100%;
+            height: 250px;
+            background: rgba(5, 6, 8, 0.8);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            position: relative;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .canvas-label {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            z-index: 5;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 维度1独有：执迷之物注入区 */
+        .interactive-panel-m {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-text {
+            flex-grow: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 0.8rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-text:focus {
+            border-color: var(--glow-color);
+            background: rgba(57, 255, 20, 0.02);
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.1);
+        }
+
+        .btn-action {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: var(--font-mono);
+        }
+
+        .btn-action:hover {
+            border-color: var(--glow-color);
+            color: var(--glow-color);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+        }
+
+        /* 维度2独有：烟雾、散步、逃逸 */
+        .interactive-panel-stairs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .interactive-panel-stairs .btn-action {
+            flex-grow: 1;
+        }
+
+        /* 楼梯与电梯位置追踪 */
+        .stairs-tracker {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            z-index: 10;
+        }
+
+        .stair-node {
+            width: 25px;
+            height: 25px;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-family: var(--font-mono);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg-color);
+        }
+
+        .stair-node.active {
+            border-color: var(--glow-color);
+            color: var(--glow-color);
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+            transform: scale(1.15);
+        }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-family: var(--font-mono);
+            border-top: 1px solid rgba(255,255,255,0.03);
+            background: rgba(5,6,8,0.95);
+        }
+
+        /* 全局全屏滤镜特效 (进入雾气时触发) */
+        .dissolution-effect {
+            filter: blur(1px) contrast(1.2) hue-rotate(45deg);
+            transition: filter 1s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 氛围背景 -->
+    <div class="ambient-bg" id="ambient-bg"></div>
+
+    <!-- 顶部导航 -->
+    <header>
+        <div class="logo">共创空间</div>
+        <div class="audio-ctrl" id="audio-toggle">
+            <svg class="audio-icon" viewBox="0 0 24 24" id="audio-icon">
+                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM12 4L9.91 6.09 12 8.18V4zm-8 8H6l5 5v-4.18L5.18 10H4v4zM19 12c0 2.94-1.7 5.48-4.17 6.64l1.35 1.35C19.34 18.28 21 15.33 21 12s-1.66-6.28-4.82-8l-1.35 1.35C17.3 6.52 19 9.06 19 12z" />
+            </svg>
+            <span id="audio-text" style="font-size: 0.8rem; font-family: var(--font-mono); color: var(--glow-color);">音效: ON</span>
+        </div>
+    </header>
+
+    <!-- 主体内容 -->
+    <main>
+        <!-- 引入区 -->
+        <div class="intro-banner">
+            <h1>文学互动共创空间</h1>
+            <p>点击进入下方小说分支，在文字与感官的共鸣中，开启深入意识底层的交互漫游。</p>
+        </div>
+
+        <!-- 双维度双栏 -->
+        <div class="dimensions-container">
+            
+            <!-- 维度一：智者的苏醒 -->
+            <div class="dimension-card" id="dim-m" style="position: relative;">
+                <div class="dimension-tag">Dimension 01 // 固态 · 大脑芯片与亿年之石</div>
+                <h3 class="dimension-title" style="letter-spacing: 0.1rem; cursor: pointer;">
+                    <a href="ore.html" style="text-decoration: none; color: inherit; display: block; transition: color 0.3s;" title="点击阅读智者的苏醒">
+                        智者的苏醒 <span style="font-size: 0.8rem; color: var(--glow-color); font-weight: normal; margin-left: 5px;">[点击阅读小说 ➔]</span>
+                    </a>
+                </h3>
+                
+                <div class="story-scroller" id="scroller-m">
+                    <!-- 层叠石大脑官方画报插图 -->
+                    <a href="ore.html" style="display: block; text-decoration: none; position: relative; margin-bottom: 20px; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.15); cursor: pointer;" title="点击阅读智者的苏醒">
+                        <img src="shot04_galaxy_brain.png" alt="M的芯片大脑" style="width:100%; display: block; opacity: 0.9; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), filter 0.6s;" onmouseover="this.style.transform='scale(1.05)'; this.style.filter='brightness(1.15)';" onmouseout="this.style.transform='scale(1)'; this.style.filter='none';">
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); padding: 15px 10px; text-align: center;">
+                            <span style="color: var(--glow-color); font-size: 0.85rem; font-family: var(--font-mono); font-weight: bold; text-shadow: 0 0 10px rgba(57,255,20,0.8); letter-spacing: 2px;">⚡ 点击阅读智者的苏醒 ➔</span>
+                        </div>
+                    </a>
+
+                    <p>时年六九岁的M躺在手术台上，即将被植入脑部芯片。她成了率先尝试大脑更新业务的新顾客，花费了毕生积蓄的十分之七。在昏睡过去前，她长长地呼出一口气，尝试放空自己。然后，脑海中突然浮现出了那块矿石。</p>
+                    <p>那是很多年前在高原矿石博物馆看到的：<span class="highlight-text" data-trigger="stromatolite">三十五亿年前的层叠石</span>近乎圆润的坚硬、寒武纪的海星化石上不可知的海底生物留下的细碎褶皱、砂金石深处散沙般的金色、古庙废墟般支棱出四角尖柱的方解石、深秋母蟹膏黄质地的雄黄、庞贝古墙壁画般的雌黄、日本铁壶般的铁胆石、洒了阿月浑子果碎的栗蓉蛋糕般的磷氯铅矿……</p>
+                    <p>最终，她的思维停留在那块石头前。铁灰色的团块上布满了诡谲的绿色颗粒，晶莹，密集，涵盖光谱上绿色所属的一切范畴。高原曾是海洋，也将回归入海。高原在漫长的过渡时期里从容不迫地制造着这样的石头。那一刻，时间全然、纯然地溶解于这块石头了。是她不存在。</p>
+                    <p>醒来后的M，脑海中芯片已然启动，无师自通。她对一切事物的认知增生到了让人惊诧的程度。在这个世界上，人类痛苦于“不知如何失去”，而当肉身可被完美替换时，自我究竟还属于谁？</p>
+                </div>
+
+                <!-- 3D荧光绿矿石 -->
+                <div class="canvas-container">
+                    <span class="canvas-label">3D Stromatolite Particle System (Canvas Node)</span>
+                    <canvas id="canvas-ore"></canvas>
+                </div>
+
+                <!-- 交互区：执迷注入 -->
+                <div class="interactive-panel-m">
+                    <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
+                        芯片正在连接。输入一样<strong>让你极度着迷、极为细致</strong>的事物，我们将把它编码至你的脑皮层神经元中：
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="obsess-input" class="input-text" placeholder="例如：三十五亿年前的绿色层叠石、烟草的味道..." maxlength="30">
+                        <button class="btn-action" id="btn-inject">注入大脑芯片</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 维度二：面试 -->
+            <div class="dimension-card" id="dim-entity" style="position: relative;">
+                <div class="dimension-tag" style="color: var(--accent-warm); --glow-color: var(--accent-warm);">Dimension 02 // 气态 · 57层的雾状异物</div>
+                <h3 class="dimension-title" style="letter-spacing: 0.1rem; cursor: pointer;">
+                    <a href="index4.html" style="text-decoration: none; color: inherit; display: block; transition: color 0.3s;" title="点击阅读面试">
+                        面试 <span style="font-size: 0.8rem; color: var(--accent-warm); font-weight: normal; margin-left: 5px;">[点击阅读小说 ➔]</span>
+                    </a>
+                </h3>
+                
+                <div class="story-scroller" id="scroller-entity">
+                    <!-- 57层消防楼梯官方画报插图 -->
+                    <a href="index4.html" style="display: block; text-decoration: none; position: relative; margin-bottom: 20px; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.15); cursor: pointer;" title="点击阅读面试">
+                        <img src="cover_poster_final_image_v2.jpg" alt="57层消防楼梯" style="width:100%; display: block; opacity: 0.9; transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), filter 0.6s;" onmouseover="this.style.transform='scale(1.05)'; this.style.filter='brightness(1.15)';" onmouseout="this.style.transform='scale(1)'; this.style.filter='none';">
+                        <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); padding: 15px 10px; text-align: center;">
+                            <span style="color: var(--accent-warm); font-size: 0.85rem; font-family: var(--font-mono); font-weight: bold; text-shadow: 0 0 10px rgba(245,166,35,0.8); letter-spacing: 2px;">⚡ 点击阅读面试 ➔</span>
+                        </div>
+                    </a>
+
+                    <p>深夜两点，57层酒店的消防通道。我穿着浴袍、头发滴着水在此吸烟。极度疲惫、虚空、仿佛被漫长的差旅和社交彻底掏空。就在我掐灭烟蒂要回房时，我回头看了一眼。</p>
+                    <p>于是我看到了——一只和整段阶梯同宽同高的<span class="highlight-text" data-trigger="entity">雾状或果冻状的异物</span>正在一点一点地向下移动。空气中遗留的烟雾正在悄无声息地被吸进它体内，它的下摆像涟漪的最后一圈摇荡在我的脚尖前二十公分处，上摆依旧贴合天花板。它在无休止地轻微晃动，保持着距离。</p>
+                    <p>“请不要触摸我。请不要阻挡我。请不要进入我。”它轻声说道。它的体表有密密麻麻、极尽纤微的孔洞。它是低级的，最低级的，但它在学习生存，学习存在，甚至在学习交朋友。它说：它曾经是一个人，直到那个人把意念和身体强行融进了它里面。</p>
+                    <p>我们在这个被世界遗忘的直角楼梯间里并肩散步。在非人的寂静之中，那一刻，仿佛宇宙最高智慧正通过它表现出慈悲。它说，它能承受一切，因为这个世界早晚无以为继，但总有什么，留存了下去。</p>
+                </div>
+
+                <!-- 波动果冻烟雾实体 -->
+                <div class="canvas-container">
+                    <span class="canvas-label">Translucent Fog Entity Simulation</span>
+                    <canvas id="canvas-fog"></canvas>
+                </div>
+
+                <!-- 互动区：散步与交谈 -->
+                <div class="interactive-panel-stairs">
+                    <button class="btn-action" id="btn-smoke">扔下一支烟头 (扔下垃圾)</button>
+                    <button class="btn-action" id="btn-enter-entity" style="border-color: var(--accent-warm); color: var(--accent-warm);">尝试强行进入它 (消解自我)</button>
+                </div>
+
+                <!-- 楼梯位置追踪 -->
+                <div class="stairs-tracker">
+                    <div class="stair-node active" data-floor="57">57F</div>
+                    <div class="stair-node" data-floor="56">56F</div>
+                    <div class="stair-node" data-floor="55">55F</div>
+                    <div class="stair-node" data-floor="54">54F</div>
+                    <div class="stair-node" data-floor="53">53F</div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer>
+        <p>M &amp; ENTITY // COGNITIVE COUPLING PLATFORM // STABLE VERSION v3.82</p>
+    </footer>
+
+    <!-- JS 逻辑（全套还原最高级互动版！） -->
+    <script>
+        // ================= Web Audio API 氛围音乐合成器 =================
+        let audioCtx = null;
+        let mainDrone = null;
+        let noiseNode = null;
+        let filterNode = null;
+        let lfoNode = null;
+        let gainNode = null;
+        let isAudioPlaying = false;
+
+        function initAmbientAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            mainDrone = audioCtx.createOscillator();
+            mainDrone.type = 'sawtooth';
+            mainDrone.frequency.value = 75;
+
+            const droneFilter = audioCtx.createBiquadFilter();
+            droneFilter.type = 'lowpass';
+            droneFilter.frequency.value = 150;
+
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+            noiseNode = audioCtx.createBufferSource();
+            noiseNode.buffer = noiseBuffer;
+            noiseNode.loop = true;
+
+            filterNode = audioCtx.createBiquadFilter();
+            filterNode.type = 'bandpass';
+            filterNode.frequency.value = 400;
+            filterNode.Q.value = 1.0;
+
+            lfoNode = audioCtx.createOscillator();
+            lfoNode.frequency.value = 0.15;
+            const lfoGain = audioCtx.createGain();
+            lfoGain.gain.value = 150;
+
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = 0.08; 
+
+            lfoNode.connect(lfoGain);
+            lfoGain.connect(filterNode.frequency);
+
+            mainDrone.connect(droneFilter);
+            droneFilter.connect(gainNode);
+
+            noiseNode.connect(filterNode);
+            filterNode.connect(gainNode);
+
+            gainNode.connect(audioCtx.destination);
+
+            mainDrone.start(0);
+            noiseNode.start(0);
+            lfoNode.start(0);
+            isAudioPlaying = true;
+        }
+
+        function toggleAudio() {
+            if (!audioCtx) {
+                initAmbientAudio();
+                updateAudioUI(true);
+                return;
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+                isAudioPlaying = true;
+                updateAudioUI(true);
+            } else if (audioCtx.state === 'running') {
+                audioCtx.suspend();
+                isAudioPlaying = false;
+                updateAudioUI(false);
+            }
+        }
+
+        function updateAudioUI(isPlaying) {
+            const icon = document.getElementById('audio-icon');
+            const text = document.getElementById('audio-text');
+            if (isPlaying) {
+                text.textContent = "音效: ON";
+                text.style.color = "var(--glow-color)";
+                icon.style.fill = "var(--glow-color)";
+            } else {
+                text.textContent = "音效: MUTED";
+                text.style.color = "var(--text-secondary)";
+                icon.style.fill = "var(--text-secondary)";
+            }
+        }
+
+        document.getElementById('audio-toggle').addEventListener('click', toggleAudio);
+
+
+        // ================= Canvas 1: 3D荧光绿矿石粒子 (Stromatolite) =================
+        const canvasOre = document.getElementById('canvas-ore');
+        const ctxOre = canvasOre.getContext('2d');
+        let oreParticles = [];
+        let oreWords = []; 
+        let angleX = 0.003;
+        let angleY = 0.005;
+
+        function resizeCanvases() {
+            if (canvasOre) {
+                canvasOre.width = canvasOre.parentElement.clientWidth;
+                canvasOre.height = canvasOre.parentElement.clientHeight;
+            }
+            if (canvasFog) {
+                canvasFog.width = canvasFog.parentElement.clientWidth;
+                canvasFog.height = canvasFog.parentElement.clientHeight;
+            }
+        }
+
+        function initOre() {
+            oreParticles = [];
+            const particleCount = 280;
+            const radius = 65;
+
+            for (let i = 0; i < particleCount; i++) {
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos((Math.random() * 2) - 1);
+                const noise = 1 + (Math.sin(theta * 5) * Math.cos(phi * 4) * 0.18);
+                const r = radius * noise;
+
+                const x = r * Math.sin(phi) * Math.cos(theta);
+                const y = r * Math.sin(phi) * Math.sin(theta);
+                const z = r * Math.cos(phi);
+
+                const greenColors = [
+                    'rgba(57, 255, 20, 0.9)', 
+                    'rgba(0, 250, 154, 0.8)', 
+                    'rgba(46, 139, 87, 0.7)', 
+                    'rgba(127, 255, 0, 0.95)',
+                    'rgba(144, 238, 144, 0.8)'
+                ];
+                const color = greenColors[Math.floor(Math.random() * greenColors.length)];
+                oreParticles.push({ x, y, z, baseR: r, color, size: Math.random() * 2 + 1 });
+            }
+        }
+
+        function drawOre() {
+            if (!canvasOre) return;
+            ctxOre.clearRect(0, 0, canvasOre.width, canvasOre.height);
+            const cx = canvasOre.width / 2;
+            const cy = canvasOre.height / 2;
+            const fov = 200; 
+
+            oreParticles.forEach(p => {
+                let x1 = p.x * Math.cos(angleY) - p.z * Math.sin(angleY);
+                let z1 = p.z * Math.cos(angleY) + p.x * Math.sin(angleY);
+                let y2 = p.y * Math.cos(angleX) - z1 * Math.sin(angleX);
+                let z2 = z1 * Math.cos(angleX) + p.y * Math.sin(angleX);
+
+                p.x = x1; p.y = y2; p.z = z2;
+
+                const scale = fov / (fov + z2);
+                const projX = cx + x1 * scale;
+                const projY = cy + y2 * scale;
+
+                const alpha = Math.max(0.1, (fov - z2) / (fov * 1.5));
+                ctxOre.fillStyle = p.color.replace('0.9', alpha).replace('0.8', alpha).replace('0.7', alpha);
+                
+                ctxOre.beginPath();
+                ctxOre.arc(projX, projY, p.size * scale, 0, Math.PI * 2);
+                ctxOre.fill();
+            });
+
+            oreWords.forEach((w, index) => {
+                let x1 = w.x * Math.cos(angleY) - w.z * Math.sin(angleY);
+                let z1 = w.z * Math.cos(angleY) + w.x * Math.sin(angleY);
+                let y2 = w.y * Math.cos(angleX) - z1 * Math.sin(angleX);
+                let z2 = z1 * Math.cos(angleX) + w.y * Math.sin(angleX);
+
+                w.x = x1; w.y = y2; w.z = z2;
+
+                const scale = fov / (fov + z2);
+                const projX = cx + x1 * scale;
+                const projY = cy + y2 * scale;
+
+                const alpha = Math.max(0.2, (fov - z2) / (fov * 1.5));
+                ctxOre.fillStyle = `rgba(57, 255, 20, ${alpha})`;
+                ctxOre.font = `${Math.max(10, 12 * scale)}px var(--font-mono)`;
+                ctxOre.fillText(w.text, projX, projY);
+            });
+
+            requestAnimationFrame(drawOre);
+        }
+
+        function injectObsession(text) {
+            if (!text) return;
+            const r = 90 + Math.random() * 30; 
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.random() * Math.PI;
+
+            const x = r * Math.sin(phi) * Math.cos(theta);
+            const y = r * Math.sin(phi) * Math.sin(theta);
+            const z = r * Math.cos(phi);
+
+            oreWords.push({ x, y, z, text });
+            if (oreWords.length > 12) {
+                oreWords.shift();
+            }
+        }
+
+
+        // ================= Canvas 2: 气态/半透明波动果冻烟雾实体 (Fog Entity) =================
+        const canvasFog = document.getElementById('canvas-fog');
+        const ctxFog = canvasFog.getContext('2d');
+        let fogBlobs = [];
+        let particlesInFog = [];
+        let isWarped = false; // 核心修复：声明 isWarped 变量避免浏览器报错 
+
+        class FogBlob {
+            constructor() {
+                this.x = canvasFog.width / 2;
+                this.y = canvasFog.height / 2;
+                this.radius = 45;
+                this.points = [];
+                this.pointCount = 12;
+                this.noiseScale = 15;
+                this.time = Math.random() * 100;
+                
+                for (let i = 0; i < this.pointCount; i++) {
+                    const angle = (i / this.pointCount) * Math.PI * 2;
+                    this.points.push({ angle: angle, r: this.radius });
+                }
+            }
+
+            update(mx, my) {
+                this.time += 0.02;
+                const targetX = mx || canvasFog.width / 2;
+                const targetY = my || canvasFog.height / 2;
+                this.x += (targetX - this.x) * 0.05;
+                this.y += (targetY - this.y) * 0.05;
+
+                this.points.forEach((p, idx) => {
+                    const sineNoise = Math.sin(this.time + idx * 0.8) * this.noiseScale;
+                    const cosNoise = Math.cos(this.time * 0.5 - idx * 0.6) * (this.noiseScale * 0.5);
+                    p.r = this.radius + sineNoise + cosNoise;
+                });
+            }
+
+            draw() {
+                ctxFog.save();
+                const gradient = ctxFog.createRadialGradient(
+                    this.x, this.y, this.radius * 0.2, 
+                    this.x, this.y, this.radius * 1.8
+                );
+                gradient.addColorStop(0, 'rgba(245, 166, 35, 0.45)');
+                gradient.addColorStop(0.5, 'rgba(57, 255, 20, 0.15)');
+                gradient.addColorStop(1, 'rgba(11, 12, 14, 0)');
+
+                ctxFog.fillStyle = gradient;
+                ctxFog.beginPath();
+                
+                const p0 = this.points[0];
+                let currX = this.x + Math.cos(p0.angle) * p0.r;
+                let currY = this.y + Math.sin(p0.angle) * p0.r;
+                ctxFog.moveTo(currX, currY);
+
+                for (let i = 1; i < this.pointCount; i++) {
+                    const p = this.points[i];
+                    currX = this.x + Math.cos(p.angle) * p.r;
+                    currY = this.y + Math.sin(p.angle) * p.r;
+                    ctxFog.lineTo(currX, currY);
+                }
+                ctxFog.closePath();
+                ctxFog.fill();
+
+                ctxFog.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+                ctxFog.lineWidth = 1;
+                ctxFog.stroke();
+                ctxFog.restore();
+            }
+        }
+
+        function spawnSmokeAshes() {
+            for (let i = 0; i < 20; i++) {
+                particlesInFog.push({
+                    x: Math.random() * canvasFog.width,
+                    y: 0, 
+                    vx: Math.random() * 0.6 - 0.3,
+                    vy: Math.random() * 1.5 + 0.5,
+                    size: Math.random() * 2 + 1,
+                    alpha: Math.random() * 0.5 + 0.3
+                });
+            }
+        }
+
+        let mouseX = null;
+        let mouseY = null;
+
+        if (canvasFog) {
+            canvasFog.addEventListener('mousemove', (e) => {
+                const rect = canvasFog.getBoundingClientRect();
+                mouseX = e.clientX - rect.left;
+                mouseY = e.clientY - rect.top;
+            });
+
+            canvasFog.addEventListener('mouseleave', () => {
+                mouseX = null;
+                mouseY = null;
+            });
+        }
+
+        function initFog() {
+            fogBlobs = [new FogBlob()];
+            particlesInFog = [];
+        }
+
+        function drawFog() {
+            if (!canvasFog) return;
+            ctxFog.clearRect(0, 0, canvasFog.width, canvasFog.height);
+
+            particlesInFog.forEach((p, idx) => {
+                p.x += p.vx; p.y += p.vy;
+                p.alpha -= 0.001; 
+
+                ctxFog.fillStyle = `rgba(245, 166, 35, ${p.alpha})`;
+                ctxFog.beginPath();
+                ctxFog.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctxFog.fill();
+
+                fogBlobs.forEach(blob => {
+                    const dx = p.x - blob.x;
+                    const dy = p.y - blob.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < blob.radius * 1.4) {
+                        p.vx += (blob.x - p.x) * 0.15;
+                        p.vy += (blob.y - p.y) * 0.15;
+                        
+                        if (dist < 10) {
+                            particlesInFog.splice(idx, 1);
+                            blob.radius = Math.min(75, blob.radius + 0.3);
+                        }
+                    }
+                });
+
+                if (p.y > canvasFog.height || p.alpha <= 0) {
+                    particlesInFog.splice(idx, 1);
+                }
+            });
+
+            fogBlobs.forEach(blob => {
+                blob.update(mouseX, mouseY);
+                blob.draw();
+                if (blob.radius > 45) {
+                    blob.radius -= 0.02;
+                }
+            });
+
+            requestAnimationFrame(drawFog);
+        }
+
+
+        // ================= 联动与触发事件监听 =================
+
+        document.getElementById('btn-inject').addEventListener('click', () => {
+            const input = document.getElementById('obsess-input');
+            const val = input.value.trim();
+            if (!val) {
+                alert("请输入一样着迷的东西。例如那颗三十五亿年前的高原层叠石。");
+                return;
+            }
+            
+            // 核心机制：安全写入 localStorage，保障在各种沙箱中不发生 JS 报错崩溃
+            try {
+                localStorage.setItem('user_obsession', val);
+            } catch (e) {
+                console.warn("LocalStorage 写入在沙箱中受限：", e);
+            }
+            
+            // 播放脑电波震荡音效
+            if (audioCtx) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 1.2);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 1.3);
+            }
+
+            // 全屏消融大转场并平滑跳转
+            document.body.style.transition = 'all 1.2s cubic-bezier(0.25, 1, 0.5, 1)';
+            document.body.style.filter = 'blur(15px) brightness(1.8)';
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                window.location.href = 'fusion_success.html';
+            }, 1200);
+        });
+
+        document.getElementById('btn-smoke').addEventListener('click', () => {
+            spawnSmokeAshes();
+            if (audioCtx) {
+                const bufferSize = audioCtx.sampleRate * 0.4;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+                
+                const highpass = audioCtx.createBiquadFilter();
+                highpass.type = 'highpass';
+                highpass.frequency.value = 5000;
+
+                const gain = audioCtx.createGain();
+                gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+
+                noise.connect(highpass);
+                highpass.connect(gain);
+                gain.connect(audioCtx.destination);
+                noise.start();
+            }
+        });
+
+        document.getElementById('btn-enter-entity').addEventListener('click', () => {
+            const body = document.body;
+            const btn = document.getElementById('btn-enter-entity');
+            
+            if (!isWarped) {
+                body.classList.add('dissolution-effect');
+                btn.textContent = "退回凡世 (还原自我)";
+                btn.style.borderColor = "var(--glow-color)";
+                btn.style.color = "var(--glow-color)";
+                isWarped = true;
+                
+                if (filterNode) {
+                    filterNode.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 1);
+                    filterNode.Q.setValueAtTime(5, audioCtx.currentTime + 1);
+                }
+            } else {
+                body.classList.remove('dissolution-effect');
+                btn.textContent = "尝试强行进入它 (消解自我)";
+                btn.style.borderColor = "var(--accent-warm)";
+                btn.style.color = "var(--accent-warm)";
+                isWarped = false;
+                
+                if (filterNode) {
+                    filterNode.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 1);
+                    filterNode.Q.setValueAtTime(1, audioCtx.currentTime + 1);
+                }
+            }
+        });
+
+        const nodes = document.querySelectorAll('.stair-node');
+        nodes.forEach(node => {
+            node.addEventListener('click', () => {
+                nodes.forEach(n => n.classList.remove('active'));
+                node.classList.add('active');
+                
+                const floor = parseInt(node.getAttribute('data-floor'));
+                if (fogBlobs.length > 0) {
+                    const blob = fogBlobs[0];
+                    blob.radius = 45 + (57 - floor) * 5; 
+                }
+
+                if (audioCtx) {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(110 - (57 - floor)*10, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.8);
+                }
+            });
+        });
+
+        document.querySelectorAll('.highlight-text').forEach(el => {
+            el.addEventListener('click', () => {
+                const trigger = el.getAttribute('data-trigger');
+                if (trigger === 'stromatolite') {
+                    angleY = 0.04;
+                    setTimeout(() => { angleY = 0.005; }, 1000);
+                    injectObsession("★ 三十五亿年层叠石 ★");
+                } else if (trigger === 'entity') {
+                    spawnSmokeAshes();
+                }
+            });
+        });
+
+
+        // ================= 初始化入口 =================
+        window.addEventListener('resize', resizeCanvases);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            resizeCanvases();
+            initOre();
+            drawOre();
+            initFog();
+            drawFog();
+            initAmbientAudio();
+            updateAudioUI(true);
+        });
+    </script>
+</body>
+</html>

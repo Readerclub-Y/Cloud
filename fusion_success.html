@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W827018 | 脑电波全息重组舱</title>
+    <style>
+        :root {
+            --bg-color: #050607;
+            --border-color: rgba(57, 255, 20, 0.25);
+            --glow-color: #39ff14;
+            --text-primary: #e0e4eb;
+            --text-secondary: #7f8999;
+            --font-mono: 'Courier New', Courier, monospace, "Microsoft YaHei";
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body, html {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, var(--font-mono);
+            overflow-y: auto;
+            min-height: 100%;
+        }
+
+        /* 氛围光背景 */
+        .glowing-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 50% 50%, rgba(57, 255, 20, 0.05) 0%, #050607 100%);
+            z-index: -2;
+        }
+
+        /* 主容器 */
+        main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 1.5rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            perspective: 1200px; /* 3D 视距 */
+        }
+
+        /* 进程同步状态 */
+        .sync-card {
+            border: 1px solid var(--border-color);
+            padding: 1.8rem 2.5rem;
+            background: rgba(14, 16, 20, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(57, 255, 20, 0.08);
+            margin-bottom: 2.5rem;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .sync-progress {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            color: var(--glow-color);
+            margin-bottom: 0.6rem;
+            letter-spacing: 2px;
+            transition: color 0.3s;
+        }
+
+        .sync-text {
+            font-size: 1.05rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #fff;
+            transition: color 0.3s;
+        }
+
+        /* 3D 全息海报悬浮卡片容器 */
+        .poster-container {
+            width: 100%;
+            max-width: 280px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            border: 1px solid rgba(57, 255, 20, 0.3);
+            overflow: hidden;
+            box-shadow: 0 15px 45px rgba(57, 255, 20, 0.25);
+            margin-bottom: 2rem;
+            position: relative;
+            transform-style: preserve-3d; /* 启用3D子空间 */
+            transform: rotateX(10deg) rotateY(-12deg); /* 默认三维倾斜悬浮 */
+            transition: transform 0.15s ease-out, opacity 1.5s ease-out;
+        }
+
+        .poster-container img {
+            width: 100%;
+            display: block;
+            pointer-events: none;
+        }
+
+        /* 全息偏光扫光折射层 */
+        .hologram-glare {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0) 0%, rgba(57, 255, 20, 0.2) 50%, rgba(255,255,255,0) 100%);
+            mix-blend-mode: color-dodge;
+            pointer-events: none;
+            transform: translateX(-100%);
+            transition: transform 0.15s ease-out;
+            z-index: 5;
+        }
+
+        /* 读者意念投射数据展示 */
+        .obsession-print {
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2.5rem;
+            max-width: 720px;
+            line-height: 1.8;
+            font-weight: bold;
+        }
+        
+        #obsession-text {
+            color: var(--glow-color) !important;
+            font-size: 1.45rem !important;
+            font-weight: 800 !important;
+            font-style: italic;
+            text-shadow: 0 0 15px rgba(57, 255, 20, 0.6) !important;
+            display: inline-block;
+            margin: 0 6px;
+        }
+
+        /* 呼应跳转按钮 */
+        .btn-jump {
+            background: transparent;
+            border: 1px solid var(--glow-color);
+            color: var(--glow-color);
+            padding: 1.2rem 3rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
+            font-family: var(--font-mono);
+            width: 100%;
+            max-width: 440px;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+        }
+
+        .btn-jump:hover {
+            background: var(--glow-color);
+            color: #050607;
+            box-shadow: 0 0 35px rgba(57, 255, 20, 0.6);
+            font-weight: bold;
+            transform: translateY(-2px);
+        }
+
+        /* 针对矮屏手机自适应 */
+        @media (max-height: 780px) {
+            .poster-container {
+                max-width: 200px;
+                margin-bottom: 1.5rem;
+            }
+            .sync-card {
+                padding: 1.2rem 1.8rem;
+                margin-bottom: 1.5rem;
+            }
+            .obsession-print {
+                margin-bottom: 1.5rem;
+                font-size: 0.95rem;
+            }
+            .btn-jump {
+                padding: 0.9rem 2rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glowing-bg"></div>
+
+    <main>
+        
+        <!-- 同步进程 -->
+        <div class="sync-card">
+            <div class="sync-progress" id="progress-text">[ 脑神经回路桥接中... 0% ]</div>
+            <div class="sync-text" id="sync-status">W827018 系统同步初始化中...</div>
+        </div>
+
+        <!-- 3D 全息悬浮卡片 -->
+        <div class="poster-container" id="poster-box" style="opacity: 0; transform: scale(0.95) rotateX(10deg) rotateY(-12deg); transition: transform 0.15s ease-out, opacity 1.5s ease;">
+            <img src="cover_poster_ore_transformed.jpg" alt="脑神经电路重组海报">
+            <div class="hologram-glare" id="poster-glare"></div>
+        </div>
+
+        <!-- 读者的意识注入词汇 -->
+        <div class="obsession-print" id="obsession-box" style="opacity: 0; transition: opacity 1s ease;">
+            “乙方代号意识印记：‘<span id="obsession-text" style="color: #fff; font-weight: bold;"></span>’ 已成功写入脑皮层第 4 神经元。肉体无形资产升级完成。”
+        </div>
+
+        <!-- 最终进入按钮 -->
+        <a href="ore.html" class="btn-jump" id="btn-next" style="opacity: 0; pointer-events: none; transition: all 0.8s ease;">➔ [ 点击进入：智者的苏醒（节选）舱 ]</a>
+
+    </main>
+
+    <script>
+        let bgmAudio = null;
+    let bgmPlaying = false;
+
+    // 核心初始化：加载并循环播放您的专属过渡背景音乐 fusion.mp3
+    function initBGM() {
+        if (bgmAudio) return;
+        bgmAudio = new Audio('fusion.mp3');
+        bgmAudio.loop = true;
+        bgmAudio.volume = 0.5; // 设置 50% 适中音量
+        
+        bgmAudio.addEventListener('error', function() {
+            console.log("本地未检测到 fusion.mp3 物理文件，进入纯净 Web Audio 声学合成器机制。");
+        });
+
+        bgmAudio.play().then(() => {
+            bgmPlaying = true;
+        }).catch(e => {
+            console.log("浏览器自动播放限制，等待读者触屏/交互唤醒 fusion.mp3...");
+        });
+    }
+
+    // 双向控制：如果用户点击了画廊或页面，确保唤醒 BGM
+    function triggerFusionBGM() {
+        initBGM();
+        if (bgmAudio && bgmAudio.paused) {
+            bgmAudio.play().then(() => { bgmPlaying = true; });
+        }
+    }
+    document.addEventListener('click', triggerFusionBGM);
+    document.addEventListener('scroll', triggerFusionBGM);
+    document.addEventListener('touchstart', triggerFusionBGM);
+
+    window.addEventListener('DOMContentLoaded', () => {
+        // 进页面立刻启动尝试自动播放 BGM
+        initBGM();
+            
+            // 安全存储读取函数，防止沙箱环境报错
+            function getSafeLocalStorage(key, defaultValue) {
+                try {
+                    if (typeof window !== 'undefined' && 'localStorage' in window && window.localStorage !== null) {
+                        return window.localStorage.getItem(key) || defaultValue;
+                    }
+                } catch (e) {
+                    console.warn("LocalStorage 读取受限，启用默认值：", e);
+                }
+                return defaultValue;
+            }
+            
+            const userObsession = getSafeLocalStorage('user_obsession', "三十五亿年层叠石");
+            const obsessionTextEl = document.getElementById('obsession-text');
+            if (obsessionTextEl) {
+                obsessionTextEl.textContent = userObsession;
+            }
+
+            const progressEl = document.getElementById('progress-text');
+            const statusEl = document.getElementById('sync-status');
+            
+            const posterBox = document.getElementById('poster-box');
+            const obsessionBox = document.getElementById('obsession-box');
+            const btnNext = document.getElementById('btn-next');
+            const glareEl = document.getElementById('poster-glare');
+
+            // 0% -> 12% -> 48% -> 89% -> 100%
+            const steps = [0, 12, 48, 89, 100];
+            let stepIdx = 0;
+
+            const interval = setInterval(() => {
+                stepIdx++;
+                if (stepIdx >= steps.length) {
+                    clearInterval(interval);
+                    
+                    // 100% 同步成功
+                    if (progressEl) {
+                        progressEl.textContent = `[ 脑神经回路桥接中... 12% ... 48% ... 89% ... 100% ]`;
+                        progressEl.style.color = `var(--glow-color)`;
+                    }
+                    if (statusEl) {
+                        statusEl.textContent = `[ W827018 契约挂钩完成：FUSION SUCCESS ]`;
+                        statusEl.style.color = `var(--glow-color)`;
+                    }
+
+                    // 呈现电路海报
+                    if (posterBox) {
+                        setTimeout(() => {
+                            posterBox.style.opacity = 1;
+                            // 保持初始3D倾斜角度，淡入揭幕
+                            posterBox.style.transform = 'rotateX(10deg) rotateY(-12deg) scale(1)';
+                            playAwakeningChord(); // 爆发终极觉醒和弦
+                        }, 400);
+                    }
+
+                    // 打印意识印记
+                    if (obsessionBox) {
+                        setTimeout(() => {
+                            obsessionBox.style.opacity = 1;
+                        }, 1100);
+                    }
+
+                    // 呈现最终大按钮
+                    if (btnNext) {
+                        setTimeout(() => {
+                            btnNext.style.opacity = 1;
+                            btnNext.style.pointerEvents = 'auto';
+                        }, 1800);
+                    }
+                } else {
+                    const curVal = steps[stepIdx];
+                    // 播放与进度条严格同步的“神经扫描电荷脉冲音调”
+                    playNeuralPing(stepIdx);
+
+                    let loadingStr = "[ 脑神经回路桥接中... ";
+                    for (let i = 1; i <= stepIdx; i++) {
+                        loadingStr += `${steps[i]}% ... `;
+                    }
+                    if (progressEl) {
+                        progressEl.textContent = loadingStr;
+                    }
+
+                    const statuses = [
+                        "W827018 系统同步初始化中...",
+                        "纳米ANI血液精确定位给药中...",
+                        "下丘脑荷尔蒙内分泌调谐中...",
+                        "海马沟神经突触建立完成..."
+                    ];
+                    if (statusEl) {
+                        statusEl.textContent = statuses[stepIdx - 1];
+                    }
+                }
+            }, 550);
+
+            // ================= 3D 全息鼠标与手机陀螺仪自转双轨算法 =================
+            let mouseX = null;
+            let mouseY = null;
+            let autoAngle = 0;
+
+            // 监听鼠标在卡片上的移动
+            document.addEventListener('mousemove', (e) => {
+                const cx = window.innerWidth / 2;
+                const cy = window.innerHeight / 2;
+                mouseX = (e.clientX - cx) / cx; // -1 到 1
+                mouseY = (e.clientY - cy) / cy; // -1 到 1
+                
+                // 3D 矩阵倾斜计算
+                const rotX = -mouseY * 22; // 纵向偏转最大 22度
+                const rotY = mouseX * 22;  // 横向偏转最大 22度
+                
+                if (posterBox && posterBox.style.opacity == 1) {
+                    posterBox.style.transform = `rotateX(${10 + rotX}deg) rotateY(${-12 + rotY}deg) scale(1.03)`;
+                }
+                
+                // 全息极光扫光折射偏移
+                if (glareEl) {
+                    glareEl.style.transform = `translateX(${mouseX * 80}%)`;
+                }
+            });
+
+            // 鼠标移出后重置
+            document.addEventListener('mouseleave', () => {
+                mouseX = null;
+                mouseY = null;
+            });
+
+            // 核心：针对移动端（或无鼠标运动时）启动平滑全息自转晃动
+            function autoParallax() {
+                if (mouseX === null && mouseY === null) {
+                    autoAngle += 0.015;
+                    const rotX = Math.sin(autoAngle) * 8; // 正弦波动 8度
+                    const rotY = Math.cos(autoAngle) * 8; // 余弦波动 8度
+                    
+                    if (posterBox && posterBox.style.opacity == 1) {
+                        posterBox.style.transform = `rotateX(${10 + rotX}deg) rotateY(${-12 + rotY}deg) scale(1)`;
+                    }
+                    if (glareEl) {
+                        glareEl.style.transform = `translateX(${Math.sin(autoAngle) * 45}%)`;
+                    }
+                }
+                requestAnimationFrame(autoParallax);
+            }
+            autoParallax(); // 启动全息自转
+
+            // ================= Web Audio API 实时高科音效合成器 =================
+            let audioCtx = null;
+
+            // 1. 同步加载期的“数字神经元放电”脉冲 (Beeps) - 随进度音调越来越高
+            function playNeuralPing(stepIndex) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    // 音调随进度升高：300Hz -> 420Hz -> 580Hz -> 750Hz 模拟频率共振上升
+                    const frequencies = [300, 420, 580, 750];
+                    osc.frequency.setValueAtTime(frequencies[stepIndex - 1], audioCtx.currentTime);
+                    osc.type = 'sine';
+
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.15);
+                } catch (e) {
+                    console.log("音频播放受阻:", e);
+                }
+            }
+
+            // 2. 最终重组成功的大觉醒和弦 (The Grand Cognitive Chord) - 震撼空灵
+            function playAwakeningChord() {
+                try {
+                    if (!audioCtx) {
+                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    
+                    // 创造宏大丰满的三重奏和弦
+                    const chordFrequencies = [110, 220, 440, 660, 880];
+                    
+                    chordFrequencies.forEach((freq, idx) => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        const filter = audioCtx.createBiquadFilter();
+
+                        osc.connect(filter);
+                        filter.connect(gain);
+                        gain.connect(audioCtx.destination);
+
+                        osc.type = (idx === 0) ? 'sawtooth' : 'sine'; // 低音用锯齿波提供力量，高音用正弦波提供空灵
+                        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                        
+                        // 缓慢向上的扫频滤波器
+                        filter.type = 'lowpass';
+                        filter.frequency.setValueAtTime(200, audioCtx.currentTime);
+                        filter.frequency.exponentialRampToValueAtTime(1800, audioCtx.currentTime + 1.2);
+
+                        // 极富混响感的长淡出增益
+                        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+
+                        osc.start();
+                        osc.stop(audioCtx.currentTime + 1.5);
+                    });
+                } catch (e) {
+                    console.log("和弦播放失败:", e);
+                }
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a27ec593ac65beb2',t:'MTc4NjE5NDczNw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

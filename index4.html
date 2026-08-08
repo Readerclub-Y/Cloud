@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>面试 | 小说阅读舱</title>
+    <style>
+        :root {
+            --bg-color: #050607;
+            --border-color: rgba(245, 166, 35, 0.25);
+            --glow-color: #f5a623;
+            --text-primary: #e0e4eb;
+            --text-secondary: #9099a8;
+            --font-mono: 'Courier New', Courier, monospace, "Microsoft YaHei";
+            --panel-bg: rgba(14, 16, 20, 0.95);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body, html {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, var(--font-mono);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        #back-to-index {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            z-index: 99999;
+            background: rgba(14, 14, 14, 0.85);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        #back-to-index:hover {
+            border-color: var(--glow-color);
+            color: var(--glow-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 166, 35, 0.2);
+        }
+        .back-icon {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 90px auto 4rem;
+            padding: 2rem;
+        }
+
+        .novel-header {
+            border-bottom: 1px dashed rgba(255,255,255,0.05);
+            padding-bottom: 2rem;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .novel-header h1 {
+            font-size: 2.8rem;
+            font-weight: 300;
+            letter-spacing: 0.4rem;
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .novel-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+        }
+
+        .novel-content {
+            font-size: 1.05rem;
+            line-height: 2.1;
+            letter-spacing: 1px;
+            color: var(--text-primary);
+            text-align: justify;
+            margin-bottom: 4rem;
+        }
+
+        .novel-content p {
+            margin-bottom: 2rem;
+            text-indent: 2em;
+        }
+
+        /* 留言吐槽墙 */
+        .comments-section {
+            padding: 3rem 2rem;
+            background: rgba(20, 22, 26, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 4rem;
+        }
+
+        .comments-section-title {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            letter-spacing: 0.2rem;
+            color: #fff;
+        }
+
+        .comments-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 800px) {
+            .comments-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .comment-form-panel {
+            background: rgba(20, 22, 26, 0.6);
+            padding: 1.5rem;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .comment-list-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            max-height: 380px;
+            overflow-y: auto;
+            padding-right: 0.8rem;
+        }
+
+        .comment-card {
+            background: rgba(255,255,255,0.01);
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 6px;
+            padding: 1.2rem;
+            position: relative;
+        }
+
+        .comment-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--glow-color);
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.6rem;
+            font-family: var(--font-mono);
+        }
+
+        .comment-author {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .comment-body {
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+
+        .input-text {
+            width: 100%;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 0.8rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-text:focus {
+            border-color: var(--glow-color);
+            box-shadow: 0 0 10px rgba(245, 166, 35, 0.1);
+        }
+
+        .btn-action {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: var(--font-mono);
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-action:hover {
+            border-color: var(--glow-color);
+            color: var(--glow-color);
+            box-shadow: 0 0 15px rgba(245, 166, 35, 0.2);
+        }
+
+        /* 呼应跳转按钮 */
+        .btn-jump {
+            background: transparent;
+            border: 1px solid var(--glow-color);
+            color: var(--glow-color);
+            padding: 1.2rem 3rem;
+            font-size: 1.15rem;
+            cursor: pointer;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(245, 166, 35, 0.1);
+            font-family: var(--font-mono);
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            margin-top: 2rem;
+        }
+
+        .btn-jump:hover {
+            background: var(--glow-color);
+            color: #050607;
+            box-shadow: 0 0 35px rgba(245, 166, 35, 0.6);
+            font-weight: bold;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 返回大厅按钮 -->
+    <a href="index2.html" id="back-to-index" title="返回分支大厅 (可直接按键盘 ESC 键)">
+        <svg class="back-icon" viewBox="0 0 24 24" style="transform: rotate(180deg);">
+            <path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-8.29-1.42 1.42 5.43 5.43H5v2z"/>
+        </svg>
+        <span>返回分支 [ESC]</span>
+    </a>
+
+    <main>
+        
+        <div class="novel-header">
+            <h1 style="color: var(--glow-color);">面试</h1>
+            <p style="color: var(--glow-color);">第二维度 // 气态 · 虚空之相遇</p>
+        </div>
+
+        <!-- 激活感官跳转（按您的要求，移到文章上方！） -->
+        <a href="staircase.html" class="btn-jump" style="margin-top: 0; margin-bottom: 3rem;">⚡ 推开消防门：进入 20 镜漫画交互漫游 ➔</a>
+
+        <div class="novel-content">
+            <p>57层。酒店消防通道里的安静简直是固态的，水泥封堵的楼梯井里连空气都像是静止的。我穿着浴袍和棉拖鞋，头发末梢还会滴水。我知道我应该下楼，到户外，到距离大楼一百米外的吸烟点，但知道有屁用，已经累得半死，还滴着水。总有一个逃生空间可以给恶习留条生路。试探性地推开消防门后，面对一整个儿人为的、又是无人的空间，我长舒气。</p>
+            <p>吸烟的时候能听到烟纸燃烧时的嘶嘶声。一根烟很快就抽完了，我把它摁灭在随身带的袖珍烟灰缸里。很想想点什么，但只想到抽完这根烟就是星期一了，就点燃了第二根。抽第二根烟时什么都没想，只是看着楼梯坚定地上下，直角阶梯坚硬地曲折。</p>
+            <p>快抽完时，我退到门边。刚才已经用袖珍烟灰缸挡住弹簧门了。我很怕门一旦合上就拉不开了，现在是深夜两点，那将让我十分无助。就在我掐灭烟蒂，拾起烟灰缸，拉住门把手要回房时，不知为什么回头看了一眼。于是我看到了——一只和整段阶梯同宽同高的雾状或果冻状的异物正在一点一点地向下移动。在我定睛去看的几秒钟内，它以楼梯设定的方向不可否认地向我移来。空气中遗留的烟雾正在悄无声息的被吸进它去...</p>
+            <p>在它又移下三级阶梯后，我恢复了冷静。我问，你是清洁工吗？ 它说，你好。</p>
+            <p>我感到一种前所未有的亲密感。一般来说，禁令只会挑动起更强的挑衅心，比如“请不要触摸我”就会让你特别想去触摸。我向它说：“‘我’是个实用的代称，但也让人为难。自从那个人进入了我，我的空间 and 时间都被打乱了...”</p>
+        </div>
+
+        <!-- 逃生通道对话墙（留言区） -->
+        <div class="comments-section">
+            <h3 class="comments-section-title">【 逃生通道对话墙：虚空与重构 】</h3>
+            <div class="comments-grid">
+                
+                <!-- 留言表单 -->
+                <div class="comment-form-panel">
+                    <h4 style="font-size: 1rem; color: #fff; margin-bottom: 1rem; font-family: var(--font-mono);">发射你的频段信号：</h4>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div>
+                            <input type="text" id="comment-author" class="input-text" placeholder="发射源代号" value="匿名旅行者">
+                        </div>
+                        <div>
+                            <textarea id="comment-text" class="input-text" rows="4" placeholder="“如果肉体或大脑只剩下十分之三属于自己，那我还是那个可以去高原看层叠石的人吗？”" style="resize: none; font-family: inherit;"></textarea>
+                        </div>
+                        <button class="btn-action" id="btn-submit-comment">将思维射向虚空</button>
+                    </div>
+                </div>
+
+                <!-- 留言列表 -->
+                <div class="comment-list-panel" id="comment-list"></div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const commentListEl = document.getElementById('comment-list');
+        const defaultComments = [
+            { author: "57F幸存客", text: "每当我累得像条死狗，躲在酒店消防楼梯间抽第二根烟时，我也希望有这么一团没有欲望、没有性别、只在暗处慢慢呼吸、懂得倾听、可以吞噬掉一切尘埃和垃圾的异类来陪着我。那不是神，那只是虚空中我们渴望的完美折射。", time: "2026-08-04" },
+            { author: "虚无旅行者", text: "《面试》中充满了“人机取代人际”的彻骨孤独，以及“我只是辅助线上的一粒墨”的渺小感。能在文字下听到这声低音，留下我的信号，感觉我存在过。", time: "2026-08-04" }
+        ];
+
+        function loadComments() {
+            let comments = localStorage.getItem('interactive_comments');
+            try {
+                if (!comments) {
+                    comments = defaultComments;
+                    localStorage.setItem('interactive_comments', JSON.stringify(comments));
+                } else {
+                    comments = JSON.parse(comments);
+                }
+            } catch (e) {
+                console.warn("读取或解析对话墙留言缓存失败，已自动重置为默认评论数据：", e);
+                comments = defaultComments;
+                localStorage.setItem('interactive_comments', JSON.stringify(comments));
+            }
+            renderComments(comments);
+        }
+
+        function renderComments(list) {
+            if (!commentListEl) return;
+            commentListEl.innerHTML = '';
+            const revList = [...list].reverse();
+            revList.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'comment-card';
+                card.innerHTML = `
+                    <div class="comment-header">
+                        <span class="comment-author">${escapeHTML(item.author)}</span>
+                        <span>信道: ${item.time}</span>
+                    </div>
+                    <div class="comment-body">${escapeHTML(item.text).replace(/\n/g, '<br>')}</div>
+                `;
+                commentListEl.appendChild(card);
+            });
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        document.getElementById('btn-submit-comment').addEventListener('click', () => {
+            const authorInput = document.getElementById('comment-author');
+            const textInput = document.getElementById('comment-text');
+            const author = authorInput.value.trim() || "匿名旅行者";
+            const text = textInput.value.trim();
+
+            if (!text) {
+                alert("请输入脑电信号波动的具体内容。");
+                return;
+            }
+            const today = new Date().toISOString().split('T')[0];
+            const newComment = { author, text, time: today };
+            let comments = JSON.parse(localStorage.getItem('interactive_comments') || '[]');
+            comments.push(newComment);
+            localStorage.setItem('interactive_comments', JSON.stringify(comments));
+            renderComments(comments);
+            textInput.value = '';
+        });
+
+        // 监听 ESC 键
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' || e.key === 'Esc') {
+                window.location.href = 'index2.html';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadComments);
+    </script>
+</body>
+</html>
